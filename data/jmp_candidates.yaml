@@ -1,54 +1,17 @@
 # ============================================================
-# Job Market Paper Candidates — 2025-2026 Season
+# Job Market Paper Candidates — Manual Additions
 # ============================================================
-# Update this file once a year in December.
-# For each candidate, provide at minimum: name, school, and
-# either a paper_url (direct link to the PDF or landing page)
-# or a paper_title (used to search OpenAlex/Semantic Scholar).
-#
-# The script will fetch metadata, score against your interests,
-# and add eligible papers to the weekly reading pool.
+# The automated scraper (code/05_fetch_jmp.py) handles most
+# departments. Use this file to add candidates the scraper
+# misses — e.g., from departments it can't access, or
+# candidates you hear about from colleagues.
 # ============================================================
 
 season: "2025-2026"
 
-# To populate: visit department placement pages listed below,
-# or browse https://econ.now/candidates, and add candidates
-# whose research interests overlap with yours.
-#
-# Department placement pages (for reference):
-#   MIT:          https://economics.mit.edu/people/phd-students/job-market
-#   Harvard:      https://economics.harvard.edu/job-market
-#   Stanford:     https://economics.stanford.edu/job-market/job-market-candidates
-#   Berkeley:     https://econ.berkeley.edu/grad/job-market
-#   Princeton:    https://economics.princeton.edu/graduate-program/job-market/
-#   Yale:         https://economics.yale.edu/graduate/placement
-#   Chicago:      https://economics.uchicago.edu/content/job-market-candidates
-#   Northwestern: https://economics.northwestern.edu/graduate/prospective/placement.html
-#   Columbia:     https://econ.columbia.edu/phd/job-market-candidates/
-#   Penn:         https://economics.sas.upenn.edu/graduate/candidates
-#   Duke:         https://econ.duke.edu/phd-program/job-market-candidates
-#   NYU:          https://as.nyu.edu/departments/econ/job-market.html
-#   LSE:          https://www.lse.ac.uk/economics/job-market
-#   Michigan:     https://lsa.umich.edu/econ/phd-program/job-market-candidates.html
-#   Wisconsin:    https://econ.wisc.edu/doctoral/job-market/
-
 candidates:
-  # --- Example entries (replace with real candidates in December) ---
-
   # - name: "Jane Doe"
   #   school: "MIT"
   #   fields: ["labor", "public"]
   #   paper_title: "The Effect of X on Y: Evidence from Z"
   #   paper_url: "https://janedoe.com/jmp.pdf"
-
-  # - name: "John Smith"
-  #   school: "Harvard"
-  #   fields: ["political economy", "development"]
-  #   paper_title: "Political Connections and Firm Performance"
-  #   paper_url: "https://scholar.harvard.edu/jsmith/jmp.pdf"
-
-  # Minimal entry (title-only, metadata fetched automatically):
-  # - name: "Alice Chen"
-  #   school: "Stanford"
-  #   paper_title: "Structural Estimation of Labor Market Frictions"

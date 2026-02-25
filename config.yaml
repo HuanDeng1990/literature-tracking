@@ -315,33 +315,13 @@ openalex_discovery:
   max_results_per_query: 50
 
 # --- Job market papers ---
-# Semi-automated: the tracker can scrape EconNow or you can
-# manually add department URLs. For now, we provide a curated
-# list of top-program placement pages to check.
+# Fully automated: the scraper fetches department placement pages,
+# extracts candidates + JMP titles + PDF links, and stores them in the DB.
+# Runs once in December (via launchd or --jmp flag).
+# Manual additions can go in data/jmp_candidates.yaml.
 job_market:
   enabled: true
   season: "2025-2026"        # update each fall
-  sources:
-    - name: "EconNow Candidates"
-      url: "https://econ.now/candidates"
-    - name: "MIT Economics"
-      url: "https://economics.mit.edu/people/phd-students/job-market"
-    - name: "Harvard Economics"
-      url: "https://economics.harvard.edu/job-market"
-    - name: "Stanford Economics"
-      url: "https://economics.stanford.edu/job-market/job-market-candidates"
-    - name: "UC Berkeley Economics"
-      url: "https://econ.berkeley.edu/grad/job-market"
-    - name: "Princeton Economics"
-      url: "https://economics.princeton.edu/graduate-program/job-market/"
-    - name: "Yale Economics"
-      url: "https://economics.yale.edu/graduate/placement"
-    - name: "Chicago Economics"
-      url: "https://economics.uchicago.edu/content/job-market-candidates"
-    - name: "Northwestern Economics"
-      url: "https://economics.northwestern.edu/graduate/prospective/placement.html"
-    - name: "Columbia Economics"
-      url: "https://econ.columbia.edu/phd/job-market-candidates/"
 
 # --- Output settings ---
 output:

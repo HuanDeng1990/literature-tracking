@@ -213,37 +213,40 @@ All settings live in `config.yaml`:
 
 ## Job market papers
 
-JMPs are seasonal (October–May), so the system handles them differently from regular journal tracking:
+JMPs are seasonal (October–May), so the system handles them differently from regular journal tracking.
+
+**Fully automated:** The scraper visits placement pages for 15 top programs (MIT, Harvard, Stanford, Princeton, Chicago, Yale, Columbia, Berkeley, Penn, Duke, NYU, LSE, Northwestern, Michigan, Wisconsin), extracts candidate names, fields, and paper titles/PDFs, then resolves additional metadata via Semantic Scholar and OpenAlex.
 
 **How it works:**
 
-1. **In December**, populate `data/jmp_candidates.yaml` with candidates whose research interests you — visit the department placement pages listed in the file, browse [EconNow](https://econ.now/candidates), or ask colleagues.
-2. **Run the JMP fetch** (or let the launchd job handle it on Dec 10):
-   ```bash
-   python3 code/00_master.py --jmp              # fetch & add to DB
-   python3 code/05_fetch_jmp.py --dry-run       # preview without writing
-   ```
-3. The script resolves paper metadata via Semantic Scholar and OpenAlex, finds OA PDFs, and stores them as `source=jmp` in the database.
-4. JMPs then compete with regular papers in the weekly reading scorer — they appear alongside top-5 and NBER papers in your weekly picks.
+1. **December 10**: The launchd job automatically runs the scraper — no manual intervention needed.
+2. The scraper visits each department's placement page and extracts JMP candidates.
+3. For departments where papers are listed directly (Columbia, Chicago, Wisconsin), it grabs titles and PDF links immediately.
+4. For departments listing only names (Harvard, Berkeley), it searches Semantic Scholar and OpenAlex to resolve paper metadata.
+5. All JMPs are stored in the DB as `source=jmp` and compete alongside top-5/NBER papers in weekly reading picks.
 
-**YAML format** (`data/jmp_candidates.yaml`):
+```bash
+# Run manually anytime
+python3 code/00_master.py --jmp              # full scrape → DB
+python3 code/05_fetch_jmp.py --dry-run       # preview without writing
+
+# Manage December schedule
+launchctl list | grep littracker.jmp
+launchctl unload ~/Library/LaunchAgents/com.littracker.jmp.plist
+launchctl load ~/Library/LaunchAgents/com.littracker.jmp.plist
+```
+
+**Manual additions:** For candidates the scraper misses (e.g., from departments it can't access), add them to `data/jmp_candidates.yaml`:
 ```yaml
 candidates:
   - name: "Jane Doe"
     school: "MIT"
     fields: ["labor", "public"]
     paper_title: "The Effect of X on Y: Evidence from Z"
-    paper_url: "https://janedoe.com/jmp.pdf"    # optional, helps PDF download
+    paper_url: "https://janedoe.com/jmp.pdf"
 ```
 
-**Scheduling:** A separate launchd job (`com.littracker.jmp.plist`) runs December 10 to auto-fetch. You can also run `--jmp` manually anytime.
-
-```bash
-# Manage JMP schedule
-launchctl list | grep littracker.jmp
-launchctl unload ~/Library/LaunchAgents/com.littracker.jmp.plist
-launchctl load ~/Library/LaunchAgents/com.littracker.jmp.plist
-```
+**Known limitations:** Department page formats change yearly. The scraper covers the most common HTML structures, but some departments (Northwestern, Michigan) block automated access. Princeton and Yale pages mix candidates with faculty, so the scraper may include some false positives that naturally score low in the weekly picks.
 
 ## Data sources & limits
 
