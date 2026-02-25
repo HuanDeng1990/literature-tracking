@@ -1,0 +1,29 @@
+# Data
+data/papers.db
+data/temp/
+
+# Downloaded PDFs
+output/weekly_reading/papers/
+
+# Generated digests and reading lists (regenerable from DB)
+output/digests/
+output/weekly_reading/*.md
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+
+# Credentials (never commit)
+.env
+
+# launchd plist contains credentials — use the template instead
+com.littracker.weekly.plist

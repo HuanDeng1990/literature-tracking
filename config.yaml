@@ -1,0 +1,351 @@
+# ============================================================
+# Literature Tracking Configuration
+# ============================================================
+# Customize this file to match your research interests.
+# The tracker pulls from RSS feeds (journals, NBER) and the
+# OpenAlex API (free, no key required).
+# ============================================================
+
+# --- Your identity (used for polite OpenAlex API access) ---
+email: "your_email@university.edu"   # CHANGE THIS — faster API responses
+
+# --- Keywords and JEL codes for relevance filtering ---
+# Papers matching ANY keyword (case-insensitive, checked against title + abstract)
+# will be flagged as "high relevance" in digests.
+keywords:
+  - "structural estimation"
+  - "discrete choice"
+  - "dynamic programming"
+  - "causal inference"
+  - "difference-in-differences"
+  - "regression discontinuity"
+  - "instrumental variable"
+  - "synthetic control"
+  - "bunching"
+  - "BLP"
+  - "random coefficient"
+  - "machine learning"
+  - "heterogeneous treatment"
+
+jel_codes:
+  - "C51"   # Model construction and estimation
+  - "C57"   # Econometrics of games and auctions
+  - "D72"   # Political processes
+  - "H0"    # Public economics general
+  - "I0"    # Health, education, welfare general
+  - "J0"    # Labor general
+  - "L0"    # Industrial organization general
+  - "P16"   # Political economy
+
+# --- Weekly reading list: scoring criteria ---
+# The picker scores papers on multiple dimensions and selects the top 7.
+# Adjust weights to taste (higher = more important in ranking).
+weekly_picks:
+  num_papers: 7
+
+  # Primary field keywords — papers matching these get a large field bonus
+  field_keywords:
+    labor:
+      - "labor"
+      - "labour"
+      - "wage"
+      - "employment"
+      - "unemployment"
+      - "worker"
+      - "human capital"
+      - "job"
+      - "occupation"
+      - "migration"
+      - "immigrant"
+      - "gender gap"
+      - "labor market"
+      - "labor supply"
+      - "labor demand"
+      - "minimum wage"
+      - "union"
+      - "collective bargaining"
+      - "skill"
+      - "training"
+      - "education"
+      - "school"
+      - "returns to education"
+    political_economy:
+      - "political economy"
+      - "voting"
+      - "election"
+      - "politician"
+      - "political"
+      - "democracy"
+      - "lobbying"
+      - "redistribution"
+      - "populism"
+      - "corruption"
+      - "regulation"
+      - "policy"
+      - "partisan"
+      - "legislature"
+      - "bureaucracy"
+      - "state capacity"
+      - "institution"
+      - "governance"
+      - "conflict"
+      - "protest"
+    applied_micro:
+      - "applied"
+      - "field experiment"
+      - "natural experiment"
+      - "quasi-experiment"
+      - "program evaluation"
+      - "welfare"
+      - "inequality"
+      - "poverty"
+      - "health"
+      - "crime"
+      - "housing"
+      - "neighborhood"
+      - "discrimination"
+
+  # Bonus keywords — papers with these traits get extra weight
+  structural_keywords:
+    - "structural model"
+    - "structural estimation"
+    - "structural approach"
+    - "counterfactual"
+    - "equilibrium model"
+    - "dynamic model"
+    - "discrete choice"
+    - "dynamic programming"
+    - "BLP"
+    - "random coefficient"
+    - "sufficient statistic"
+    - "general equilibrium"
+    - "life-cycle"
+    - "lifecycle"
+    - "search model"
+    - "matching model"
+    - "sorting model"
+    - "Roy model"
+
+  novel_data_keywords:
+    - "novel data"
+    - "new data"
+    - "administrative data"
+    - "linked data"
+    - "register data"
+    - "digitized"
+    - "newly available"
+    - "web scraping"
+    - "satellite"
+    - "text as data"
+    - "natural language"
+    - "machine learning"
+    - "big data"
+    - "granular data"
+    - "high-frequency"
+    - "transaction-level"
+    - "individual-level"
+    - "matched employer-employee"
+    - "census"
+    - "historical"
+    - "archival"
+    - "survey experiment"
+    - "unique data"
+    - "proprietary data"
+
+  novel_measurement_keywords:
+    - "measurement"
+    - "new measure"
+    - "novel measure"
+    - "index"
+    - "construct"
+    - "quantify"
+    - "conceptualize"
+    - "operationalize"
+    - "proxy"
+    - "decomposition"
+    - "taxonomy"
+    - "typology"
+    - "framework"
+    - "new metric"
+    - "latent"
+    - "unobserved"
+    - "elicit"
+
+  # Scoring weights
+  weights:
+    journal_top5: 30
+    journal_top_field: 20
+    journal_field: 15
+    nber: 18
+    field_match: 25       # matches labor / poliecon / applied micro
+    structural: 20
+    novel_data: 15
+    novel_measurement: 15
+    keyword_relevant: 10  # general keyword match from above
+
+# --- Notification settings ---
+notification:
+  macos_banner: true                         # native macOS notification banner
+  open_file_on_complete: true                # auto-open the weekly reading list
+  email:
+    enabled: true
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    sender: "denghuannsd@gmail.com"
+    password_env: "LIT_TRACKER_EMAIL_PWD"    # Gmail App Password — see README for setup
+    recipient: "denghuannsd@gmail.com"
+
+# --- Paper download settings ---
+download:
+  enabled: true
+  papers_dir: "output/weekly_reading/papers"   # PDFs land here, in weekly subfolders
+  timeout: 60                                  # seconds per download attempt
+  # Multi-source fallback chain for finding open-access PDFs:
+  #   1. OpenAlex OA URL (captured during fetch)
+  #   2. Unpaywall API (free, best OA coverage)
+  #   3. Semantic Scholar API (supplementary OA source)
+  #   4. NBER direct PDF link (for NBER working papers)
+  # Papers without any OA version are logged for manual download.
+
+# --- Journal sources ---
+# Each entry: name, type (rss or openalex), and source identifier.
+# For RSS: provide the feed URL.
+# For OpenAlex: provide the OpenAlex source ID (find at https://openalex.org/sources).
+
+journals:
+
+  # ---- Top 5 ----
+  - name: "American Economic Review"
+    type: openalex
+    openalex_id: "S23254222"
+
+  - name: "Econometrica"
+    type: rss
+    url: "https://onlinelibrary.wiley.com/feed/14680262/most-recent"
+
+  - name: "Journal of Political Economy"
+    type: rss
+    url: "https://www.journals.uchicago.edu/action/showFeed?type=etoc&feed=rss&jc=jpe"
+
+  - name: "Quarterly Journal of Economics"
+    type: openalex
+    openalex_id: "S203860005"
+
+  - name: "Review of Economic Studies"
+    type: openalex
+    openalex_id: "S88935262"
+
+  # ---- Top General / Applied ----
+  - name: "Review of Economics and Statistics"
+    type: openalex
+    openalex_id: "S180061323"
+
+  - name: "Journal of the European Economic Association"
+    type: openalex
+    openalex_id: "S165087003"
+
+  - name: "AEJ: Applied Economics"
+    type: openalex
+    openalex_id: "S42893225"
+
+  - name: "AEJ: Economic Policy"
+    type: openalex
+    openalex_id: "S158011328"
+
+  # ---- Field Journals (Labor / Public / Health / IO) ----
+  - name: "Journal of Labor Economics"
+    type: rss
+    url: "https://www.journals.uchicago.edu/action/showFeed?type=etoc&feed=rss&jc=jole"
+
+  - name: "Journal of Public Economics"
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/00472727"
+
+  - name: "Journal of Health Economics"
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/01676296"
+
+  - name: "Journal of Human Resources"
+    type: openalex
+    openalex_id: "S62957338"
+
+  - name: "RAND Journal of Economics"
+    type: rss
+    url: "https://onlinelibrary.wiley.com/feed/17562171/most-recent"
+
+  - name: "Journal of Urban Economics"
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/00941190"
+
+  - name: "Journal of Development Economics"
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/03043878"
+
+  # ---- Econometrics ----
+  - name: "Journal of Econometrics"
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/03044076"
+
+# --- Working paper sources ---
+nber:
+  enabled: true
+  feeds:
+    - name: "All New NBER"
+      url: "https://back.nber.org/rss/new.xml"
+    # Uncomment program-specific feeds you care about:
+    # - name: "NBER Labor Studies"
+    #   url: "https://back.nber.org/rss/newls.xml"
+    # - name: "NBER Public Economics"
+    #   url: "https://back.nber.org/rss/newpe.xml"
+    # - name: "NBER Industrial Organization"
+    #   url: "https://back.nber.org/rss/newio.xml"
+    # - name: "NBER Health Economics"
+    #   url: "https://back.nber.org/rss/neweh.xml"
+    # - name: "NBER Education"
+    #   url: "https://back.nber.org/rss/newed.xml"
+
+# --- OpenAlex broad discovery ---
+# Beyond specific journals, search OpenAlex for recent papers
+# matching your keywords across all indexed sources.
+openalex_discovery:
+  enabled: true
+  lookback_days: 14          # how far back to search
+  max_results_per_query: 50  # per keyword batch
+
+# --- Job market papers ---
+# Semi-automated: the tracker can scrape EconNow or you can
+# manually add department URLs. For now, we provide a curated
+# list of top-program placement pages to check.
+job_market:
+  enabled: true
+  season: "2025-2026"        # update each fall
+  sources:
+    - name: "EconNow Candidates"
+      url: "https://econ.now/candidates"
+    - name: "MIT Economics"
+      url: "https://economics.mit.edu/people/phd-students/job-market"
+    - name: "Harvard Economics"
+      url: "https://economics.harvard.edu/job-market"
+    - name: "Stanford Economics"
+      url: "https://economics.stanford.edu/job-market/job-market-candidates"
+    - name: "UC Berkeley Economics"
+      url: "https://econ.berkeley.edu/grad/job-market"
+    - name: "Princeton Economics"
+      url: "https://economics.princeton.edu/graduate-program/job-market/"
+    - name: "Yale Economics"
+      url: "https://economics.yale.edu/graduate/placement"
+    - name: "Chicago Economics"
+      url: "https://economics.uchicago.edu/content/job-market-candidates"
+    - name: "Northwestern Economics"
+      url: "https://economics.northwestern.edu/graduate/prospective/placement.html"
+    - name: "Columbia Economics"
+      url: "https://econ.columbia.edu/phd/job-market-candidates/"
+
+# --- Output settings ---
+output:
+  digest_format: "markdown"    # markdown or html
+  digest_dir: "output/digests"
+  weekly_picks_dir: "output/weekly_reading"
+  include_abstracts: true
+  max_abstract_length: 500     # characters
+  highlight_relevant: true     # flag keyword-matched papers

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.littracker.weekly</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/PATH/TO/Literature Tracking/code/00_master.py</string>
+        <string>--days</string>
+        <string>7</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>LIT_TRACKER_EMAIL_PWD</key>
+        <string>YOUR_GMAIL_APP_PASSWORD_HERE</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/PATH/TO/Literature Tracking</string>
+
+    <!-- Run every Sunday at 9:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>0</integer>
+        <key>Hour</key>
+        <integer>9</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/PATH/TO/Literature Tracking/data/temp/launchd_stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/PATH/TO/Literature Tracking/data/temp/launchd_stderr.log</string>
+
+    <!-- Run missed job if machine was asleep at scheduled time -->
+    <key>StartInterval</key>
+    <integer>604800</integer>
+</dict>
+</plist>
