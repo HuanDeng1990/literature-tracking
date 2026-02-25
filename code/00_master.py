@@ -17,6 +17,7 @@ fetch_mod = import_module("01_fetch")
 digest_mod = import_module("02_digest")
 picks_mod = import_module("03_weekly_picks")
 download_mod = import_module("04_download")
+jmp_mod = import_module("05_fetch_jmp")
 notify_mod = import_module("notify")
 
 
@@ -48,6 +49,10 @@ def main():
         "--no-notify", action="store_true",
         help="Skip notifications",
     )
+    parser.add_argument(
+        "--jmp", action="store_true",
+        help="Fetch job market papers from data/jmp_candidates.yaml (run in December)",
+    )
     args = parser.parse_args()
 
     new_count = 0
@@ -56,6 +61,13 @@ def main():
     picks_md = ""
     selected_papers = []
     dl_result = {"downloaded": [], "manual": []}
+
+    # Step 0: JMP fetch (December only, triggered manually)
+    if args.jmp:
+        jmp_count = jmp_mod.run()
+        print(f"→ {jmp_count} job market papers added to database.")
+        if not args.picks_only:
+            return
 
     # Step 1: Fetch
     if not args.digest_only and not args.picks_only:

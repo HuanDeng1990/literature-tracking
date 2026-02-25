@@ -25,5 +25,6 @@ __pycache__/
 # Credentials (never commit)
 .env
 
-# launchd plist contains credentials — use the template instead
+# launchd plists contain credentials — use the templates instead
 com.littracker.weekly.plist
+com.littracker.jmp.plist

@@ -178,6 +178,7 @@ weekly_picks:
     journal_top_field: 20
     journal_field: 15
     nber: 18
+    jmp: 17               # job market papers from top programs
     field_match: 25       # matches labor / poliecon / applied micro
     structural: 20
     novel_data: 15

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.littracker.jmp</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>__PROJECT_PATH__/code/00_master.py</string>
+        <string>--jmp</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>LIT_TRACKER_EMAIL_PWD</key>
+        <string>__YOUR_APP_PASSWORD__</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>__PROJECT_PATH__</string>
+
+    <!-- Run once a year on December 10 at 10:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Month</key>
+        <integer>12</integer>
+        <key>Day</key>
+        <integer>10</integer>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>__PROJECT_PATH__/data/temp/launchd_jmp_stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>__PROJECT_PATH__/data/temp/launchd_jmp_stderr.log</string>
+</dict>
+</plist>

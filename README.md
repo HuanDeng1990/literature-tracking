@@ -139,6 +139,7 @@ The picker scores every paper fetched in the past week and selects the top 7. Sc
 | `journal_top5` | Published in AER, Econometrica, JPE, QJE, REStud | 30 |
 | `journal_top_field` | Published in REStat, JEEA, AEJ journals | 20 |
 | `nber` | NBER working paper | 18 |
+| `jmp` | Job market paper from top program | 17 |
 | `field_match` | Matches labor, political economy, or applied micro keywords | 25 |
 | `structural` | Structural model, counterfactual, dynamic programming, BLP, etc. | 20 |
 | `novel_data` | Administrative data, linked data, satellite, text-as-data, etc. | 15 |
@@ -184,15 +185,18 @@ All settings live in `config.yaml`:
 ```
 ├── config.yaml                    # All settings
 ├── com.littracker.weekly.plist    # macOS launchd schedule (source copy)
+├── com.littracker.jmp.plist       # December-only JMP fetch schedule
 ├── code/
 │   ├── 00_master.py               # Orchestrates fetch → digest → picks → download → notify
 │   ├── 01_fetch.py                # Pulls papers from RSS / OpenAlex / NBER
 │   ├── 02_digest.py               # Generates full Markdown digest
 │   ├── 03_weekly_picks.py         # Scores and selects top 7 papers
 │   ├── 04_download.py             # Multi-source PDF downloader
+│   ├── 05_fetch_jmp.py            # Job market paper fetcher (December)
 │   └── notify.py                  # macOS notifications + email
 ├── data/
 │   ├── papers.db                  # SQLite database (auto-created)
+│   ├── jmp_candidates.yaml        # Curated JMP list (update each December)
 │   └── temp/                      # Logs
 ├── output/
 │   ├── digests/                   # Full weekly/daily digests
@@ -209,7 +213,37 @@ All settings live in `config.yaml`:
 
 ## Job market papers
 
-Fully automated JMP tracking is hard because departments use different formats. The `config.yaml` includes URLs for top-program placement pages you can check manually. For semi-automated tracking, [EconNow](https://econ.now/candidates) aggregates candidates across departments.
+JMPs are seasonal (October–May), so the system handles them differently from regular journal tracking:
+
+**How it works:**
+
+1. **In December**, populate `data/jmp_candidates.yaml` with candidates whose research interests you — visit the department placement pages listed in the file, browse [EconNow](https://econ.now/candidates), or ask colleagues.
+2. **Run the JMP fetch** (or let the launchd job handle it on Dec 10):
+   ```bash
+   python3 code/00_master.py --jmp              # fetch & add to DB
+   python3 code/05_fetch_jmp.py --dry-run       # preview without writing
+   ```
+3. The script resolves paper metadata via Semantic Scholar and OpenAlex, finds OA PDFs, and stores them as `source=jmp` in the database.
+4. JMPs then compete with regular papers in the weekly reading scorer — they appear alongside top-5 and NBER papers in your weekly picks.
+
+**YAML format** (`data/jmp_candidates.yaml`):
+```yaml
+candidates:
+  - name: "Jane Doe"
+    school: "MIT"
+    fields: ["labor", "public"]
+    paper_title: "The Effect of X on Y: Evidence from Z"
+    paper_url: "https://janedoe.com/jmp.pdf"    # optional, helps PDF download
+```
+
+**Scheduling:** A separate launchd job (`com.littracker.jmp.plist`) runs December 10 to auto-fetch. You can also run `--jmp` manually anytime.
+
+```bash
+# Manage JMP schedule
+launchctl list | grep littracker.jmp
+launchctl unload ~/Library/LaunchAgents/com.littracker.jmp.plist
+launchctl load ~/Library/LaunchAgents/com.littracker.jmp.plist
+```
 
 ## Data sources & limits
 

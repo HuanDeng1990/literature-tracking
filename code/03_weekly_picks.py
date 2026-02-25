@@ -60,6 +60,7 @@ FIELD_JOURNALS = {
 
 ELIGIBLE_SOURCES = TOP5 | TOP_FIELD | FIELD_JOURNALS | {
     "NBER Working Paper",
+    "Job Market Paper",
 }
 
 
@@ -88,6 +89,8 @@ def score_paper(paper: dict, cfg_picks: dict, weights: dict) -> float:
         score += weights.get("journal_top5", 30)
     elif journal in TOP_FIELD:
         score += weights.get("journal_top_field", 20)
+    elif journal == "Job Market Paper":
+        score += weights.get("jmp", 17)
     elif journal in FIELD_JOURNALS:
         score += weights.get("journal_field", 15)
     elif "NBER" in journal:
@@ -350,6 +353,8 @@ def _make_tags(paper: dict, picks_cfg: dict) -> list[str]:
         tags.append("Top 5")
     elif "NBER" in journal:
         tags.append("NBER")
+    elif journal == "Job Market Paper":
+        tags.append("JMP")
 
     return tags
 
