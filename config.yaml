@@ -42,6 +42,7 @@ jel_codes:
 # Adjust weights to taste (higher = more important in ranking).
 weekly_picks:
   num_papers: 7
+  min_score: 35                # papers below this are auto-cleared — keeps only top-5, NBER, and field-relevant papers
 
   # Primary field keywords — papers matching these get a large field bonus
   field_keywords:
@@ -308,9 +309,9 @@ nber:
 # Beyond specific journals, search OpenAlex for recent papers
 # matching your keywords across all indexed sources.
 openalex_discovery:
-  enabled: true
-  lookback_days: 14          # how far back to search
-  max_results_per_query: 50  # per keyword batch
+  enabled: false             # disabled — only tracked journals + NBER
+  lookback_days: 14
+  max_results_per_query: 50
 
 # --- Job market papers ---
 # Semi-automated: the tracker can scrape EconNow or you can

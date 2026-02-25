@@ -53,11 +53,15 @@ def init_db(conn: sqlite3.Connection):
             relevant   INTEGER DEFAULT 0
         )
     """)
-    # Migration: add oa_url column to existing databases
-    try:
-        conn.execute("ALTER TABLE papers ADD COLUMN oa_url TEXT DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass  # column already exists
+    # Migrations for existing databases
+    for col, typedef in [
+        ("oa_url", "TEXT DEFAULT ''"),
+        ("picked", "INTEGER DEFAULT 0"),
+    ]:
+        try:
+            conn.execute(f"ALTER TABLE papers ADD COLUMN {col} {typedef}")
+        except sqlite3.OperationalError:
+            pass  # column already exists
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_fetched ON papers(fetched_at)
     """)

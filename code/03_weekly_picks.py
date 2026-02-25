@@ -58,6 +58,15 @@ FIELD_JOURNALS = {
     "Journal of Political Economy Microeconomics",
 }
 
+ELIGIBLE_SOURCES = TOP5 | TOP_FIELD | FIELD_JOURNALS | {
+    "NBER Working Paper",
+}
+
+
+def _is_eligible(journal: str) -> bool:
+    """Only top-5, top field, field journals, and NBER pass the gate."""
+    return journal in ELIGIBLE_SOURCES or "NBER" in journal
+
 
 def _keyword_hits(text: str, keywords: list[str]) -> int:
     text_lower = text.lower()
@@ -68,6 +77,7 @@ def score_paper(paper: dict, cfg_picks: dict, weights: dict) -> float:
     """
     Compute a composite score for a paper.
     Higher = more likely to be selected for the weekly reading list.
+    Only called on papers that already passed the eligibility gate.
     """
     score = 0.0
     journal = paper["journal"]
@@ -126,9 +136,35 @@ def get_recent_papers(conn: sqlite3.Connection, days: int) -> list[dict]:
     return [dict(zip(cols, row)) for row in cursor.fetchall()]
 
 
+def get_unpicked_papers(conn: sqlite3.Connection) -> list[dict]:
+    """Return all papers that have never been selected for a reading list."""
+    cursor = conn.execute(
+        """SELECT paper_id, title, authors, abstract, journal, source,
+                  url, doi, oa_url, pub_date, relevant
+           FROM papers
+           WHERE picked = 0""",
+    )
+    cols = [d[0] for d in cursor.description]
+    return [dict(zip(cols, row)) for row in cursor.fetchall()]
+
+
+def mark_as_picked(conn: sqlite3.Connection, paper_ids: list):
+    """Mark papers as picked so they won't be selected again."""
+    conn.executemany(
+        "UPDATE papers SET picked = 1 WHERE paper_id = ?",
+        [(pid,) for pid in paper_ids],
+    )
+    conn.commit()
+
+
 def pick_weekly_reading(lookback_days: int = 7) -> tuple[str, str, list[dict]]:
     """
     Score, rank, and format the top N papers.
+
+    Selection pool: all unpicked papers in the database. This ensures that
+    a large initial stock (e.g. first fetch) gets worked through over
+    successive weeks rather than being lost after the first pick.
+
     Returns (markdown_string, output_file_path, selected_paper_dicts).
     """
     with open(CONFIG_PATH) as f:
@@ -137,16 +173,36 @@ def pick_weekly_reading(lookback_days: int = 7) -> tuple[str, str, list[dict]]:
     picks_cfg = cfg.get("weekly_picks", {})
     weights = picks_cfg.get("weights", {})
     num_papers = picks_cfg.get("num_papers", 7)
+    min_score = picks_cfg.get("min_score", 20)
     output_cfg = cfg.get("output", {})
     max_abstract = output_cfg.get("max_abstract_length", 500)
 
     conn = sqlite3.connect(str(DB_PATH))
-    papers = get_recent_papers(conn, lookback_days)
-    conn.close()
+
+    # Use ALL unpicked papers as the candidate pool
+    papers = get_unpicked_papers(conn)
 
     if not papers:
-        log.warning("No papers found in the last %d days.", lookback_days)
+        log.warning("No unpicked papers remaining in the database.")
+        conn.close()
         return "# Weekly Reading List\n\nNo new papers this week.\n", "", []
+
+    new_this_week = get_recent_papers(conn, lookback_days)
+    new_count = len(new_this_week)
+
+    # Hard gate: only top-5, top field, field journals, and NBER
+    ineligible = [p for p in papers if not _is_eligible(p["journal"])]
+    if ineligible:
+        mark_as_picked(conn, [p["paper_id"] for p in ineligible])
+        log.info(
+            "Auto-cleared %d papers from non-target journals.", len(ineligible),
+        )
+    papers = [p for p in papers if _is_eligible(p["journal"])]
+
+    if not papers:
+        log.warning("No eligible papers remaining.")
+        conn.close()
+        return "# Weekly Reading List\n\nNo eligible papers this week.\n", "", []
 
     for p in papers:
         p["_score"] = score_paper(p, picks_cfg, weights)
@@ -162,7 +218,29 @@ def pick_weekly_reading(lookback_days: int = 7) -> tuple[str, str, list[dict]]:
             seen_titles.add(title_norm)
             unique.append(p)
 
-    selected = unique[:num_papers]
+    # Auto-clear papers below relevance threshold
+    below = [p for p in unique if p["_score"] < min_score]
+    if below:
+        mark_as_picked(conn, [p["paper_id"] for p in below])
+        log.info(
+            "Auto-cleared %d papers below score threshold (%.0f).",
+            len(below), min_score,
+        )
+
+    eligible = [p for p in unique if p["_score"] >= min_score]
+    if not eligible:
+        log.warning("No papers above score threshold (%.0f).", min_score)
+        conn.close()
+        return "# Weekly Reading List\n\nNo papers above the relevance threshold this week.\n", "", []
+
+    selected = eligible[:num_papers]
+
+    # Mark selected papers so they won't be picked again
+    mark_as_picked(conn, [p["paper_id"] for p in selected])
+    unpicked_remaining = conn.execute(
+        "SELECT COUNT(*) FROM papers WHERE picked = 0"
+    ).fetchone()[0]
+    conn.close()
 
     # --- Format the reading list ---
     today = datetime.now()
@@ -170,12 +248,19 @@ def pick_weekly_reading(lookback_days: int = 7) -> tuple[str, str, list[dict]]:
     week_end = week_start + timedelta(days=6)
     week_label = f"{week_start.strftime('%b %d')} – {week_end.strftime('%b %d, %Y')}"
 
+    backlog_note = ""
+    if unpicked_remaining > 0:
+        backlog_note = (
+            f" {unpicked_remaining} papers remain in the backlog for future weeks."
+        )
+
     lines = [
         f"# Weekly Reading List",
         f"## {week_label}",
         "",
-        f"*Curated on {today.strftime('%A, %B %d, %Y')} — 7 papers selected from "
-        f"{len(papers)} new items this week.*",
+        f"*Curated on {today.strftime('%A, %B %d, %Y')} — {num_papers} papers selected "
+        f"from {len(papers)} unpicked candidates "
+        f"({new_count} new this week).{backlog_note}*",
         "",
         "Selection criteria: labor economics, political economy, applied micro, "
         "structural models, novel data, novel measurement/conceptualization.",
@@ -221,7 +306,7 @@ def pick_weekly_reading(lookback_days: int = 7) -> tuple[str, str, list[dict]]:
         lines.append("")
 
     # Runner-up list (next 7)
-    runners = unique[num_papers : num_papers + 7]
+    runners = eligible[num_papers : num_papers + 7]
     if runners:
         lines.append("## Also worth a look")
         lines.append("")
